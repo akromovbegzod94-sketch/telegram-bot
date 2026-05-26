@@ -10,7 +10,7 @@ bot = telebot.TeleBot(TOKEN)
 
 def download_video(url):
     ydl_opts = {
-        'format': 'mp4/best',
+        'format': 'worst',
         'outtmpl': '%(id)s.%(ext)s',
     }
 
@@ -35,7 +35,7 @@ def handle(message):
         video_file = glob.glob("*.mp4")[0]
 
         video = open(video_file, "rb")
-
+        bot.send_chat_action(message.chat.id, 'upload_video')
         bot.send_video(message.chat.id, video)
 
         video.close()
