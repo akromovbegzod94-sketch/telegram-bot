@@ -6,7 +6,7 @@ import yt_dlp
 from aiogram import Bot, Dispatcher, F
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
 from aiogram.filters import CommandStart
-from openai import OpenAI
+from groq import Groq
 
 # ====== TOKENS ======
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -16,7 +16,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = Groq(api_key=OPENAI_API_KEY)
 
 # ====== MENU ======
 menu = ReplyKeyboardMarkup(
@@ -106,7 +106,7 @@ async def all_messages(message: Message):
     try:
 
         response = client.chat.completions.create(
-            model="gpt-4.1-mini",
+            model="llama3-8b-8192",
             messages=[
                 {
                     "role": "user",
