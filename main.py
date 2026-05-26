@@ -70,8 +70,7 @@ async def all_messages(message: Message):
             "outtmpl": "video.%(ext)s",
             "noplaylist": True
         }
-
-        try:
+         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([text])
 
@@ -85,34 +84,14 @@ async def all_messages(message: Message):
 
             video_file = FSInputFile(video_file)
 
-            try:
-                await message.answer_video(video=video_file)
+            await message.answer_video(video=video_file)
 
-except Exception as e:
-    await message.answer(
-        f"Ошибка: {e}"
-    )
+            return
 
-        return
-
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": text
-                }
-            ]
-        )
-
-        reply = response.choices[0].message.content
-
-        await message.answer(reply)
-
-    except Exception as e:
-        await message.answer(
-            f"AI ошибка: {e}"
-        )
+        except Exception as e:
+            await message.answer(
+                f"Ошибка: {e}"
+            )
 
 # ====== START BOT ======
 async def main():
