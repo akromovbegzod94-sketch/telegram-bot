@@ -70,7 +70,7 @@ async def all_messages(message: Message):
             "outtmpl": "video.%(ext)s",
             "noplaylist": True
         }
-         try:
+        try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([text])
 
