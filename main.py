@@ -1,8 +1,10 @@
 import os
 import telebot
+import glob
 from yt_dlp import YoutubeDL
 
 TOKEN = os.getenv("TOKEN")
+
 bot = telebot.TeleBot(TOKEN)
 
 def download_video(url):
@@ -27,10 +29,12 @@ def handle(message):
     try:
         download_video(url)
 
-        video = open("video.mp4", "rb")
+        video_file = glob.glob("*.mp4")[0]
+        video = open(video_file, "rb")
+
         bot.send_video(message.chat.id, video)
 
     except:
         bot.reply_to(message, "Xatolik ❌")
 
-bot.polling()
+bot.infinity_polling()
