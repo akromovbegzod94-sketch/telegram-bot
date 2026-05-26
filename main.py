@@ -85,12 +85,13 @@ async def all_messages(message: Message):
 
             video_file = FSInputFile(video_file)
 
-            await message.answer_video(video=video_file)
+            try:
+                await message.answer_video(video=video_file)
 
-        except Exception as e:
-            await message.answer(
-                f"Ошибка: {e}"
-            )
+except Exception as e:
+    await message.answer(
+        f"Ошибка: {e}"
+    )
 
         return
 
