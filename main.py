@@ -4,7 +4,7 @@ import asyncio
 import yt_dlp
 
 from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 from aiogram.filters import CommandStart
 from groq import Groq
 
@@ -91,9 +91,8 @@ async def all_messages(message: Message):
 
             video_file = video_files[0]
 
-            await message.answer_video(
-                video=open(video_file, "rb")
-            )
+            video_file = FSInputFile("video.mp4")
+                await message.answer_video(video=video_file)
 
         except Exception as e:
             await message.answer(
