@@ -3,6 +3,7 @@ import glob
 import telebot
 from yt_dlp import YoutubeDL
 from ShazamAPI import Shazam
+
 TOKEN = os.getenv("TOKEN")
 
 bot = telebot.TeleBot(TOKEN)
@@ -30,25 +31,6 @@ def download_video(url):
 
 
 def download_audio(url):
-def recognize_music(file):
-    mp3_file_content_to_recognize = open(file, 'rb').read()
-
-    shazam = Shazam(mp3_file_content_to_recognize)
-
-    try:
-        recognize_generator = shazam.recognizeSong()
-        result = next(recognize_generator)
-
-        track = result[1]["track"]
-
-        title = track["title"]
-        artist = track["subtitle"]
-
-        return f"{artist} - {title}"
-
-    except:
-        return "Topilmadi"
-   def download_audio(url):
 
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -113,17 +95,17 @@ def handle(message):
 
         music_name = recognize_music("music.mp3")
 
-with open("music.mp3", "rb") as audio:
-    bot.send_audio(
-        message.chat.id,
-        audio,
-        title=music_name
-    )
+        with open("music.mp3", "rb") as audio:
+            bot.send_audio(
+                message.chat.id,
+                audio,
+                title=music_name
+            )
 
-bot.send_message(
-    message.chat.id,
-    f"🎵 Music: {music_name}"
-)
+        bot.send_message(
+            message.chat.id,
+            f"🎵 Music: {music_name}"
+        )
 
         clear_files()
 
