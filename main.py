@@ -90,8 +90,8 @@ async def all_messages(message: Message):
                 return
 
             video_file = video_files[0]
-
-            video_file = FSInputFile("video.mp4")
+            video_file = FSInputFile(video_file)
+            
                 await message.answer_video(video=video_file)
 
         except Exception as e:
