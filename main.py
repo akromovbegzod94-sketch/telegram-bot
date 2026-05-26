@@ -48,21 +48,21 @@ async def all_messages(message: Message):
     text = message.text
 
     # ====== MUSIC ======
-    if text == "🎵 Музыка":
+    if "Музыка" in text:
         await message.answer(
             "Отправь название песни 🎵"
         )
         return
 
     # ====== VIDEO ======
-    if text == "🎬 Скачать видео":
+    if "Скачать видео" in text:
         await message.answer(
             "Отправь ссылку TikTok / YouTube / Instagram 🎬"
         )
         return
 
     # ====== FIND SONG ======
-    if text == "🎤 Найти песню":
+    if "Найти песню" in text:
         await message.answer(
             "Отправь голосовое сообщение 🎤"
         )
