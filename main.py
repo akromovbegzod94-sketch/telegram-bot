@@ -77,9 +77,10 @@ def handle(message):
 
         audio_file = glob.glob("music.*")[0]
 
-        with open(audio_file, "rb") as audio:
-            bot.send_chat_action(message.chat.id, 'upload_audio')
-            bot.send_audio(message.chat.id, audio)
+        os.system(f'ffmpeg -i "{audio_file}" music.mp3 -y')
+
+with open("music.mp3", "rb") as audio:
+    bot.send_audio(message.chat.id, audio)
 
         clear_files()
 
