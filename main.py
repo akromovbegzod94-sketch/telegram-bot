@@ -10,11 +10,10 @@ bot = telebot.TeleBot(TOKEN)
 
 def download_video(url):
     ydl_opts = {
-        'format': 'best',
-        'outtmpl': 'video.%(ext)s',
-        'quiet': True,
-        'merge_output_format': 'mp4',
-    }
+    'format': 'worst',
+    'outtmpl': '%(id)s.%(ext)s',
+    'socket_timeout': 60,
+}
 
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
