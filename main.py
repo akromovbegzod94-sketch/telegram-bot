@@ -2,7 +2,7 @@ import os
 import glob
 import telebot
 from yt_dlp import YoutubeDL
-
+from ShazamAPI import Shazam
 TOKEN = os.getenv("TOKEN")
 
 bot = telebot.TeleBot(TOKEN)
@@ -30,6 +30,26 @@ def download_video(url):
 
 
 def download_audio(url):
+def recognize_music(file):
+    mp3_file_content_to_recognize = open(file, 'rb').read()
+
+    shazam = Shazam(mp3_file_content_to_recognize)
+
+    try:
+        recognize_generator = shazam.recognizeSong()
+        result = next(recognize_generator)
+
+        track = result[1]["track"]
+
+        title = track["title"]
+        artist = track["subtitle"]
+
+        return f"{artist} - {title}"
+
+    except:
+        return "Topilmadi"
+   def download_audio(url):
+
     ydl_opts = {
         'format': 'bestaudio/best',
         'outtmpl': 'music.%(ext)s',
@@ -38,6 +58,26 @@ def download_audio(url):
 
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
+
+
+def recognize_music(file):
+    mp3_file_content_to_recognize = open(file, 'rb').read()
+
+    shazam = Shazam(mp3_file_content_to_recognize)
+
+    try:
+        recognize_generator = shazam.recognizeSong()
+        result = next(recognize_generator)
+
+        track = result[1]["track"]
+
+        title = track["title"]
+        artist = track["subtitle"]
+
+        return f"{artist} - {title}"
+
+    except:
+        return "Topilmadi"
 
 
 @bot.message_handler(commands=['start'])
@@ -71,8 +111,19 @@ def handle(message):
 
         os.system(f'ffmpeg -i "{audio_file}" music.mp3 -y')
 
-        with open("music.mp3", "rb") as audio:
-            bot.send_audio(message.chat.id, audio)
+        music_name = recognize_music("music.mp3")
+
+with open("music.mp3", "rb") as audio:
+    bot.send_audio(
+        message.chat.id,
+        audio,
+        title=music_name
+    )
+
+bot.send_message(
+    message.chat.id,
+    f"🎵 Music: {music_name}"
+)
 
         clear_files()
 
