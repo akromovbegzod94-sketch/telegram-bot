@@ -1,94 +1,133 @@
 import os
 import glob
-import telebot
-from yt_dlp import YoutubeDL
+import asyncio
+import yt_dlp
 
-TOKEN = os.getenv("TOKEN")
+from aiogram import Bot, Dispatcher, F
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.filters import CommandStart
+from openai import OpenAI
 
-bot = telebot.TeleBot(TOKEN)
+# ====== TOKENS ======
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
+# ====== BOT ======
+bot = Bot(token=BOT_TOKEN)
+dp = Dispatcher()
 
-def clear_files():
-    for f in glob.glob("*"):
-        if f.endswith((".mp4", ".webm", ".m4a", ".mp3", ".mkv")):
-            try:
-                os.remove(f)
-            except:
-                pass
+client = OpenAI(api_key=OPENAI_API_KEY)
 
+# ====== MENU ======
+menu = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text="🎵 Музыка"),
+            KeyboardButton(text="🎬 Скачать видео")
+        ],
+        [
+            KeyboardButton(text="🤖 AI"),
+            KeyboardButton(text="🎤 Найти песню")
+        ]
+    ],
+    resize_keyboard=True
+)
 
-def download_video(url):
-    ydl_opts = {
-        'format': 'worst',
-        'outtmpl': '%(id)s.%(ext)s',
-        'socket_timeout': 60,
-        'noplaylist': True,
-    }
-
-    with YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
-
-
-def download_audio(url):
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': 'music.%(ext)s',
-        'noplaylist': True,
-    }
-
-    with YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
-
-
-@bot.message_handler(commands=['start'])
-def start(message):
-    bot.reply_to(
-        message,
-        "Link tashla 🎥\nBot video + mp3 yuboradi 🎵"
+# ====== START ======
+@dp.message(CommandStart())
+async def start(message: Message):
+    await message.answer(
+        "Добро пожаловать 🤖",
+        reply_markup=menu
     )
 
+# ====== MAIN ======
+@dp.message()
+async def all_messages(message: Message):
 
-@bot.message_handler(func=lambda m: True)
-def handle(message):
-    url = message.text
+    text = message.text
 
-    bot.reply_to(message, "Yuklanyapti... ⏳")
-
-    try:
-
-        # VIDEO
-        download_video(url)
-
-        video_files = (
-            glob.glob("*.mp4") +
-            glob.glob("*.webm") +
-            glob.glob("*.mkv")
+    # ====== MUSIC ======
+    if text == "🎵 Музыка":
+        await message.answer(
+            "Отправь название песни 🎵"
         )
+        return
 
-        video_file = video_files[0]
+    # ====== VIDEO ======
+    if text == "🎬 Скачать видео":
+        await message.answer(
+            "Отправь ссылку TikTok / YouTube / Instagram 🎬"
+        )
+        return
 
-        with open(video_file, "rb") as video:
-            bot.send_chat_action(message.chat.id, 'upload_video')
-            bot.send_video(message.chat.id, video)
+    # ====== FIND SONG ======
+    if text == "🎤 Найти песню":
+        await message.answer(
+            "Отправь голосовое сообщение 🎤"
+        )
+        return
 
-        # AUDIO
-        download_audio(url)
+    # ====== DOWNLOAD VIDEO ======
+    if "http" in text:
 
-        audio_file = glob.glob("music.*")[0]
+        await message.answer("Скачиваю видео... ⏳")
 
-        os.system(f'ffmpeg -i "{audio_file}" music.mp3 -y')
+        ydl_opts = {
+            "format": "best",
+            "outtmpl": "video.%(ext)s",
+            "noplaylist": True
+        }
 
-        with open("music.mp3", "rb") as audio:
-            bot.send_audio(
-                message.chat.id,
-                audio,
-                title="Audio yuklandi 🎵"
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                ydl.download([text])
+
+            video_files = glob.glob("video.*")
+
+            if not video_files:
+                await message.answer("Видео не найдено ❌")
+                return
+
+            video_file = video_files[0]
+
+            await message.answer_video(
+                video=open(video_file, "rb")
             )
 
-        clear_files()
+        except Exception as e:
+            await message.answer(
+                f"Ошибка: {e}"
+            )
+
+        return
+
+    # ====== AI ======
+    try:
+
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ]
+        )
+
+        reply = response.choices[0].message.content
+
+        await message.answer(reply)
 
     except Exception as e:
-        bot.reply_to(message, f"Xatolik ❌\n{e}")
+        await message.answer(
+            f"AI ошибка: {e}"
+        )
 
+# ====== START BOT ======
+async def main():
+    print("Бот запущен 🚀")
+    await dp.start_polling(bot)
 
-bot.infinity_polling()
+if __name__ == "__main__":
+    asyncio.run(main())
