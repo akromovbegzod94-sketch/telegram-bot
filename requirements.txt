@@ -2,3 +2,5 @@ pyTelegramBotAPI
 yt-dlp
 requests
 ffmpeg-python
+ShazamAPI
+pydub
