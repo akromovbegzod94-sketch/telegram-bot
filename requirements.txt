@@ -1,2 +1,7 @@
 pyTelegramBotAPI
 yt-dlp
+requests
+ffmpeg-python
+demucs
+torch
+torchaudio
