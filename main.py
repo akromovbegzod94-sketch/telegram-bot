@@ -2,7 +2,7 @@ import os
 import telebot
 from yt_dlp import YoutubeDL
 
-TOKEN = os.getenv("BOT_TOKEN")
+TOKEN = os.getenv("TOKEN")
 bot = telebot.TeleBot(TOKEN)
 
 def download_video(url):
