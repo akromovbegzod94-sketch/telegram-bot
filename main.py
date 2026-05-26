@@ -34,14 +34,6 @@ menu = ReplyKeyboardMarkup(
 )
 
 # ====== START ======
-@dp.message(CommandStart())
-async def start(message: Message):
-    await message.answer(
-        "Добро пожаловать 🤖",
-        reply_markup=menu
-    )
-
-# ====== MAIN ======
 @dp.message()
 async def all_messages(message: Message):
 
@@ -90,9 +82,10 @@ async def all_messages(message: Message):
                 return
 
             video_file = video_files[0]
+
             video_file = FSInputFile(video_file)
-            
-                await message.answer_video(video=video_file)
+
+            await message.answer_video(video=video_file)
 
         except Exception as e:
             await message.answer(
@@ -100,9 +93,6 @@ async def all_messages(message: Message):
             )
 
         return
-
-    # ====== AI ======
-    try:
 
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
