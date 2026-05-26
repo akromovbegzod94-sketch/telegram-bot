@@ -9,19 +9,19 @@ bot = telebot.TeleBot(TOKEN)
 
 
 def clear_files():
-    files = glob.glob("*.mp4") + glob.glob("*.webm") + glob.glob("*.m4a") + glob.glob("*.mp3")
-    for f in files:
-        try:
-            os.remove(f)
-        except:
-            pass
+    for f in glob.glob("*"):
+        if f.endswith((".mp4", ".webm", ".m4a", ".mp3")):
+            try:
+                os.remove(f)
+            except:
+                pass
 
 
 def download_video(url):
     ydl_opts = {
-        'format': 'best',
+        'format': 'worst',
         'outtmpl': '%(id)s.%(ext)s',
-        'quiet': True,
+        'socket_timeout': 60,
         'noplaylist': True,
     }
 
@@ -31,11 +31,11 @@ def download_video(url):
 
 def download_audio(url):
     ydl_opts = {
-    'format': 'bestaudio/best',
-    'outtmpl': 'music.%(ext)s',
-    'noplaylist': True,
-    'cookiefile': 'cookies.txt',
-}
+        'format': 'bestaudio/best',
+        'outtmpl': 'music.%(ext)s',
+        'noplaylist': True,
+    }
+
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
@@ -54,18 +54,11 @@ def handle(message):
 
     bot.reply_to(message, "Yuklanyapti... ⏳")
 
-    clear_files()
-
     try:
         # VIDEO
         download_video(url)
 
-        video_file = glob.glob("*.mp4")
-
-        if not video_file:
-            video_file = glob.glob("*.webm")
-
-        video_file = video_file[0]
+        video_file = glob.glob("*.mp4")[0]
 
         with open(video_file, "rb") as video:
             bot.send_chat_action(message.chat.id, 'upload_video')
@@ -78,8 +71,8 @@ def handle(message):
 
         os.system(f'ffmpeg -i "{audio_file}" music.mp3 -y')
 
-with open("music.mp3", "rb") as audio:
-    bot.send_audio(message.chat.id, audio)
+        with open("music.mp3", "rb") as audio:
+            bot.send_audio(message.chat.id, audio)
 
         clear_files()
 
@@ -87,6 +80,4 @@ with open("music.mp3", "rb") as audio:
         bot.reply_to(message, f"Xatolik ❌\n{e}")
 
 
-print("Bot ishga tushdi ✅")
-
-bot.infinity_polling(skip_pending=True)
+bot.infinity_polling()
