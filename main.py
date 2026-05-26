@@ -7,6 +7,7 @@ TOKEN = os.getenv("TOKEN")
 
 bot = telebot.TeleBot(TOKEN)
 
+
 def download_video(url):
     ydl_opts = {
         'format': 'mp4/best',
@@ -16,9 +17,11 @@ def download_video(url):
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
+
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.reply_to(message, "Link yubor 📥")
+
 
 @bot.message_handler(func=lambda m: True)
 def handle(message):
@@ -30,11 +33,17 @@ def handle(message):
         download_video(url)
 
         video_file = glob.glob("*.mp4")[0]
+
         video = open(video_file, "rb")
 
         bot.send_video(message.chat.id, video)
 
-    except:
-        bot.reply_to(message, "Xatolik ❌")
+        video.close()
+
+        os.remove(video_file)
+
+    except Exception as e:
+        bot.reply_to(message, f"Xatolik ❌\n{e}")
+
 
 bot.infinity_polling()
