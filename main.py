@@ -3,9 +3,8 @@ import glob
 import asyncio
 import yt_dlp
 
-from aiogram import Bot, Dispatcher, F
+from aiogram import Bot, Dispatcher
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
-from aiogram.filters import CommandStart
 from groq import Groq
 
 # ====== TOKENS ======
@@ -40,23 +39,34 @@ async def all_messages(message: Message):
     text = message.text
 
     # ====== MUSIC ======
-    if "Музыка" in text:
+    if text == "🎵 Музыка":
         await message.answer(
-            "Отправь название песни 🎵"
+            "Отправь название песни 🎵",
+            reply_markup=menu
         )
         return
 
     # ====== VIDEO ======
-    if "Скачать видео" in text:
+    if text == "🎬 Скачать видео":
         await message.answer(
-            "Отправь ссылку TikTok / YouTube / Instagram 🎬"
+            "Отправь ссылку TikTok / YouTube / Instagram 🎬",
+            reply_markup=menu
+        )
+        return
+
+    # ====== AI ======
+    if text == "🤖 AI":
+        await message.answer(
+            "Напиши вопрос 🤖",
+            reply_markup=menu
         )
         return
 
     # ====== FIND SONG ======
-    if "Найти песню" in text:
+    if text == "🎤 Найти песню":
         await message.answer(
-            "Отправь голосовое сообщение 🎤"
+            "Отправь голосовое сообщение 🎤",
+            reply_markup=menu
         )
         return
 
@@ -70,6 +80,7 @@ async def all_messages(message: Message):
             "outtmpl": "video.%(ext)s",
             "noplaylist": True
         }
+
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([text])
@@ -80,18 +91,34 @@ async def all_messages(message: Message):
                 await message.answer("Видео не найдено ❌")
                 return
 
-            video_file = video_files[0]
-
-            video_file = FSInputFile(video_file)
+            video_file = FSInputFile(video_files[0])
 
             await message.answer_video(video=video_file)
 
-            return
-
         except Exception as e:
-            await message.answer(
-                f"Ошибка: {e}"
-            )
+            await message.answer(f"Ошибка: {e}")
+
+        return
+
+    # ====== AI CHAT ======
+    try:
+
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ]
+        )
+
+        reply = response.choices[0].message.content
+
+        await message.answer(reply)
+
+    except Exception as e:
+        await message.answer(f"AI ошибка: {e}")
 
 # ====== START BOT ======
 async def main():
