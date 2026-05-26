@@ -31,13 +31,11 @@ def download_video(url):
 
 def download_audio(url):
     ydl_opts = {
-        'format': 'bestaudio/best',
-        'outtmpl': 'music.%(ext)s',
-        'quiet': True,
-        'noplaylist': True,'
-        'cookiefile': 'cookies.txt',
-    }
-
+    'format': 'bestaudio/best',
+    'outtmpl': 'music.%(ext)s',
+    'noplaylist': True,
+    'cookiefile': 'cookies.txt',
+}
     with YoutubeDL(ydl_opts) as ydl:
         ydl.download([url])
 
