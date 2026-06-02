@@ -6,7 +6,7 @@ import yt_dlp
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 from groq import Groq
-
+from aiogram.filters import CommandStart
 # ====== TOKENS ======
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -33,6 +33,13 @@ menu = ReplyKeyboardMarkup(
 )
 
 # ====== START ======
+@dp.message(CommandStart())
+async def start(message: Message):
+    await message.answer(
+        "Добро пожаловать 🤖",
+        reply_markup=menu
+    )
+
 @dp.message()
 async def all_messages(message: Message):
 
