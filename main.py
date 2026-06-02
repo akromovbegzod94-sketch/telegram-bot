@@ -2,6 +2,7 @@ import os
 import glob
 import asyncio
 import yt_dlp
+import requests
 
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
@@ -10,6 +11,7 @@ from aiogram.filters import CommandStart
 # ====== TOKENS ======
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+AUDD_API_KEY = os.getenv("AUDD_API_KEY")
 
 # ====== BOT ======
 bot = Bot(token=BOT_TOKEN)
