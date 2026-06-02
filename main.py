@@ -5,7 +5,7 @@ import yt_dlp
 import requests
 
 from aiogram import Bot, Dispatcher
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
+from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton
 from groq import Groq
 from aiogram.filters import CommandStart
 # ====== TOKENS ======
@@ -82,8 +82,21 @@ async def all_messages(message: Message):
     # ====== DOWNLOAD VIDEO ======
     if "http" in text:
 
-        await message.answer("Скачиваю видео... ⏳")
+        keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="🎵 Найти музыку",
+                callback_data="find_music"
+            )
+        ]
+    ]
+)
 
+await message.answer_video(
+    video=video_file,
+    reply_markup=keyboard
+)
         ydl_opts = {
             "format": "best",
             "outtmpl": "video.%(ext)s",
