@@ -117,7 +117,7 @@ try:
         ]
     )
 
-    await message.answer_video(
+       await message.answer_video(
         video=video_file,
         reply_markup=keyboard
     )
@@ -125,15 +125,10 @@ try:
 except Exception as e:
     await message.answer(f"Ошибка: {e}")
 
-return
-```
+    return
 
-            await message.answer(f"Ошибка: {e}")
-
-        return
-
-    # ====== AI CHAT ======
-    try:
+# ====== AI CHAT ======
+try:
 
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
