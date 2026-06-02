@@ -89,6 +89,9 @@ async def all_messages(message: Message):
         }
 
         try:
+            for f in glob.glob("video.*"):
+                os.remove(f)
+            
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([text])
 
