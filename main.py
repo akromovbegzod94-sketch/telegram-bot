@@ -2,155 +2,150 @@ import os
 import glob
 import asyncio
 import yt_dlp
-import requests
 
 from aiogram import Bot, Dispatcher
-from aiogram.types import Message, ReplyKeyboardMarkup, KeyboardButton, FSInputFile, InlineKeyboardMarkup, InlineKeyboardButton
-from groq import Groq
+from aiogram.types import (
+Message,
+ReplyKeyboardMarkup,
+KeyboardButton,
+FSInputFile,
+InlineKeyboardMarkup,
+InlineKeyboardButton
+)
 from aiogram.filters import CommandStart
-# ====== TOKENS ======
+from groq import Groq
+
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-AUDD_API_KEY = os.getenv("AUDD_API_KEY")
 
-# ====== BOT ======
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 client = Groq(api_key=OPENAI_API_KEY)
 
-# ====== MENU ======
 menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [
-            KeyboardButton(text="🎵 Музыка"),
-            KeyboardButton(text="🎬 Скачать видео")
-        ],
-        [
-            KeyboardButton(text="🤖 AI"),
-            KeyboardButton(text="🎤 Найти песню")
-        ]
-    ],
-    resize_keyboard=True
+keyboard=[
+[
+KeyboardButton(text="🎵 Музыка"),
+KeyboardButton(text="🎬 Скачать видео")
+],
+[
+KeyboardButton(text="🤖 AI"),
+KeyboardButton(text="🎤 Найти песню")
+]
+],
+resize_keyboard=True
 )
 
-# ====== START ======
 @dp.message(CommandStart())
 async def start(message: Message):
-    await message.answer(
-        "Добро пожаловать 🤖",
-        reply_markup=menu
-    )
+await message.answer(
+"Добро пожаловать 🤖",
+reply_markup=menu
+)
 
 @dp.message()
 async def all_messages(message: Message):
 
-    text = message.text
-
-    # ====== MUSIC ======
-    if text == "🎵 Музыка":
-        await message.answer(
-            "Отправь название песни 🎵",
-            reply_markup=menu
-        )
-        return
-
-    # ====== VIDEO ======
-    if text == "🎬 Скачать видео":
-        await message.answer(
-            "Отправь ссылку TikTok / YouTube / Instagram 🎬",
-            reply_markup=menu
-        )
-        return
-
-    # ====== AI ======
-    if text == "🤖 AI":
-        await message.answer(
-            "Напиши вопрос 🤖",
-            reply_markup=menu
-        )
-        return
-
-    # ====== FIND SONG ======
-    if text == "🎤 Найти песню":
-        await message.answer(
-            "Отправь голосовое сообщение 🎤",
-            reply_markup=menu
-        )
-        return
-
-    # ====== DOWNLOAD VIDEO ======
-    if "http" in text:
-
 ```
-await message.answer("Скачиваю видео... ⏳")
+text = message.text or ""
 
-ydl_opts = {
-    "format": "best",
-    "outtmpl": "video.%(ext)s",
-    "noplaylist": True
-}
+if text == "🎵 Музыка":
+    await message.answer(
+        "Отправь название песни 🎵",
+        reply_markup=menu
+    )
+    return
 
-try:
-    for f in glob.glob("video.*"):
-        os.remove(f)
+if text == "🎬 Скачать видео":
+    await message.answer(
+        "Отправь ссылку TikTok / YouTube / Instagram 🎬",
+        reply_markup=menu
+    )
+    return
 
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        ydl.download([text])
+if text == "🤖 AI":
+    await message.answer(
+        "Напиши вопрос 🤖",
+        reply_markup=menu
+    )
+    return
 
-    video_files = glob.glob("video.*")
+if text == "🎤 Найти песню":
+    await message.answer(
+        "Отправь голосовое сообщение 🎤",
+        reply_markup=menu
+    )
+    return
 
-    if not video_files:
-        await message.answer("Видео не найдено ❌")
-        return
+if "http" in text:
 
-    video_file = FSInputFile(video_files[0])
+    await message.answer("Скачиваю видео... ⏳")
 
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [
-                InlineKeyboardButton(
-                    text="🎵 Найти музыку",
-                    callback_data="find_music"
-                )
+    ydl_opts = {
+        "format": "best",
+        "outtmpl": "video.%(ext)s",
+        "noplaylist": True
+    }
+
+    try:
+        for f in glob.glob("video.*"):
+            os.remove(f)
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([text])
+
+        video_files = glob.glob("video.*")
+
+        if not video_files:
+            await message.answer("Видео не найдено ❌")
+            return
+
+        video_file = FSInputFile(video_files[0])
+
+        keyboard = InlineKeyboardMarkup(
+            inline_keyboard=[
+                [
+                    InlineKeyboardButton(
+                        text="🎵 Найти музыку",
+                        callback_data="find_music"
+                    )
+                ]
             ]
-        ]
-    )
+        )
 
-       await message.answer_video(
-        video=video_file,
-        reply_markup=keyboard
-    )
+        await message.answer_video(
+            video=video_file,
+            reply_markup=keyboard
+        )
 
-except Exception as e:
-    await message.answer(f"Ошибка: {e}")
+    except Exception as e:
+        await message.answer(f"Ошибка: {e}")
 
     return
 
-# ====== AI CHAT ======
 try:
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[
+            {
+                "role": "user",
+                "content": text
+            }
+        ]
+    )
 
-        response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": text
-                }
-            ]
-        )
+    reply = response.choices[0].message.content
 
-        reply = response.choices[0].message.content
+    await message.answer(reply)
 
-        await message.answer(reply)
+except Exception as e:
+    await message.answer(f"AI ошибка: {e}")
+```
 
-    except Exception as e:
-        await message.answer(f"AI ошибка: {e}")
-
-# ====== START BOT ======
 async def main():
-    print("Бот запущен 🚀")
-    await dp.start_polling(bot)
+print("Бот запущен 🚀")
+await dp.start_polling(bot)
 
-if __name__ == "__main__":
-    asyncio.run(main())
+if **name** == "**main**":
+asyncio.run(main())
