@@ -118,7 +118,21 @@ await message.answer_video(
 
             video_file = FSInputFile(video_files[0])
 
-            await message.answer_video(video=video_file)
+            keyboard = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [
+            InlineKeyboardButton(
+                text="🎵 Найти музыку",
+                callback_data="find_music"
+            )
+        ]
+    ]
+)
+
+await message.answer_video(
+    video=video_file,
+    reply_markup=keyboard
+)
 
         except Exception as e:
             await message.answer(f"Ошибка: {e}")
