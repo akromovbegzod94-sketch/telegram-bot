@@ -82,59 +82,52 @@ async def all_messages(message: Message):
     # ====== DOWNLOAD VIDEO ======
     if "http" in text:
 
-        keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text="🎵 Найти музыку",
-                callback_data="find_music"
-            )
+```
+await message.answer("Скачиваю видео... ⏳")
+
+ydl_opts = {
+    "format": "best",
+    "outtmpl": "video.%(ext)s",
+    "noplaylist": True
+}
+
+try:
+    for f in glob.glob("video.*"):
+        os.remove(f)
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([text])
+
+    video_files = glob.glob("video.*")
+
+    if not video_files:
+        await message.answer("Видео не найдено ❌")
+        return
+
+    video_file = FSInputFile(video_files[0])
+
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="🎵 Найти музыку",
+                    callback_data="find_music"
+                )
+            ]
         ]
-    ]
-)
+    )
 
-await message.answer_video(
-    video=video_file,
-    reply_markup=keyboard
-)
-        ydl_opts = {
-            "format": "best",
-            "outtmpl": "video.%(ext)s",
-            "noplaylist": True
-        }
+    await message.answer_video(
+        video=video_file,
+        reply_markup=keyboard
+    )
 
-        try:
-            for f in glob.glob("video.*"):
-                os.remove(f)
-            
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([text])
+except Exception as e:
+    await message.answer(f"Ошибка: {e}")
 
-            video_files = glob.glob("video.*")
+return
+```
 
-            if not video_files:
-                await message.answer("Видео не найдено ❌")
-                return
-
-            video_file = FSInputFile(video_files[0])
-
-            keyboard = InlineKeyboardMarkup(
-    inline_keyboard=[
-        [
-            InlineKeyboardButton(
-                text="🎵 Найти музыку",
-                callback_data="find_music"
-            )
-        ]
-    ]
-)
-
-await message.answer_video(
-    video=video_file,
-    reply_markup=keyboard
-)
-
-        except Exception as e:
             await message.answer(f"Ошибка: {e}")
 
         return
